@@ -4,6 +4,7 @@ import dotenv from 'dotenv';
 import professoresRouter from './routes/professores';
 import alunosRouter from './routes/alunos';
 import cursosRouter from './routes/cursos';
+import avaliacoesRouter from './routes/avaliacoes';
 
 dotenv.config();
 
@@ -28,6 +29,7 @@ mongoose.connect(MONGO_URL as string)
 app.use('/api', professoresRouter);
 app.use('/api', alunosRouter);
 app.use('/api', cursosRouter);
+app.use('/api', avaliacoesRouter);
 
 // Rota de health check
 app.get('/health', (req, res) => {

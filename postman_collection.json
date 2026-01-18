@@ -1,11 +1,153 @@
 {
   "info": {
-    "_postman_id": "apto-api-professores",
-    "name": "APTO API - Professores",
-    "description": "Coleção de requisições para a API de Professores",
+    "_postman_id": "apto-api",
+    "name": "APTO API",
+    "description": "Coleção de requisições para a API apto",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "item": [
+    {
+      "name": "Avaliações",
+      "item": [
+        {
+          "name": "Criar Avaliação",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"Prova Final\",\n  \"descricao\": \"Avaliação final do curso de matemática avançada com questões sobre todos os tópicos abordados\",\n  \"dataAvaliacao\": \"2026-02-15T14:00:00Z\",\n  \"idCurso\": \"{{CURSO_ID}}\"\n}"
+            },
+            "url": {
+              "raw": "{{BASE_URL}}/api/avaliacoes",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "api",
+                "avaliacoes"
+              ]
+            },
+            "description": "Cria uma nova avaliação com nome, descrição (máx 500 caracteres), data e curso associado"
+          },
+          "response": []
+        },
+        {
+          "name": "Listar Todas as Avaliações",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{BASE_URL}}/api/avaliacoes",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "api",
+                "avaliacoes"
+              ]
+            },
+            "description": "Lista todas as avaliações cadastradas com dados do curso"
+          },
+          "response": []
+        },
+        {
+          "name": "Obter Avaliação por ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{BASE_URL}}/api/avaliacoes/{{AVALIACAO_ID}}",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "api",
+                "avaliacoes",
+                "{{AVALIACAO_ID}}"
+              ]
+            },
+            "description": "Obtém uma avaliação específica pelo seu ID"
+          },
+          "response": []
+        },
+        {
+          "name": "Pesquisar Avaliação por Nome",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{BASE_URL}}/api/avaliacoes/nome/Prova",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "api",
+                "avaliacoes",
+                "nome",
+                "Prova"
+              ]
+            },
+            "description": "Pesquisa avaliações pelo nome (busca case-insensitive)"
+          },
+          "response": []
+        },
+        {
+          "name": "Atualizar Avaliação",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"Prova Final - Atualizado\",\n  \"descricao\": \"Avaliação final com novas questões\",\n  \"dataAvaliacao\": \"2026-02-20T14:00:00Z\"\n}"
+            },
+            "url": {
+              "raw": "{{BASE_URL}}/api/avaliacoes/{{AVALIACAO_ID}}",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "api",
+                "avaliacoes",
+                "{{AVALIACAO_ID}}"
+              ]
+            },
+            "description": "Atualiza o nome, descrição, data e/ou curso de uma avaliação"
+          },
+          "response": []
+        },
+        {
+          "name": "Deletar Avaliação",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{BASE_URL}}/api/avaliacoes/{{AVALIACAO_ID}}",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "api",
+                "avaliacoes",
+                "{{AVALIACAO_ID}}"
+              ]
+            },
+            "description": "Remove uma avaliação do banco de dados"
+          },
+          "response": []
+        }
+      ]
+    },
     {
       "name": "Cursos",
       "item": [
@@ -451,6 +593,11 @@
     },
     {
       "key": "CURSO_ID",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "AVALIACAO_ID",
       "value": "",
       "type": "string"
     }
