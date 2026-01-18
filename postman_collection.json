@@ -1,0 +1,458 @@
+{
+  "info": {
+    "_postman_id": "apto-api-professores",
+    "name": "APTO API - Professores",
+    "description": "Coleção de requisições para a API de Professores",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Cursos",
+      "item": [
+        {
+          "name": "Criar Curso",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"Matemática Avançada\",\n  \"descricao\": \"Curso de matemática avançada cobrindo cálculo, álgebra linear e equações diferenciais\",\n  \"idProfessor\": \"{{PROFESSOR_ID}}\",\n  \"idCursoReforco\": null\n}"
+            },
+            "url": {
+              "raw": "{{BASE_URL}}/api/cursos",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "api",
+                "cursos"
+              ]
+            },
+            "description": "Cria um novo curso com nome, descrição (máx 500 caracteres), professor e opcionalmente um curso de reforço"
+          },
+          "response": []
+        },
+        {
+          "name": "Listar Todos os Cursos",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{BASE_URL}}/api/cursos",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "api",
+                "cursos"
+              ]
+            },
+            "description": "Lista todos os cursos cadastrados com dados do professor"
+          },
+          "response": []
+        },
+        {
+          "name": "Obter Curso por ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{BASE_URL}}/api/cursos/{{CURSO_ID}}",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "api",
+                "cursos",
+                "{{CURSO_ID}}"
+              ]
+            },
+            "description": "Obtém um curso específico pelo seu ID"
+          },
+          "response": []
+        },
+        {
+          "name": "Pesquisar Curso por Nome",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{BASE_URL}}/api/cursos/nome/Matemática",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "api",
+                "cursos",
+                "nome",
+                "Matemática"
+              ]
+            },
+            "description": "Pesquisa cursos pelo nome (busca case-insensitive)"
+          },
+          "response": []
+        },
+        {
+          "name": "Atualizar Curso",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"Matemática Avançada - Atualizado\",\n  \"descricao\": \"Curso atualizado com novos conteúdos\",\n  \"idCursoReforco\": null\n}"
+            },
+            "url": {
+              "raw": "{{BASE_URL}}/api/cursos/{{CURSO_ID}}",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "api",
+                "cursos",
+                "{{CURSO_ID}}"
+              ]
+            },
+            "description": "Atualiza o nome, descrição e/ou professor de um curso"
+          },
+          "response": []
+        },
+        {
+          "name": "Deletar Curso",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{BASE_URL}}/api/cursos/{{CURSO_ID}}",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "api",
+                "cursos",
+                "{{CURSO_ID}}"
+              ]
+            },
+            "description": "Remove um curso do banco de dados"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Alunos",
+      "item": [
+        {
+          "name": "Criar Aluno",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"Maria Santos\",\n  \"senha\": \"123456\"\n}"
+            },
+            "url": {
+              "raw": "{{BASE_URL}}/api/alunos",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "api",
+                "alunos"
+              ]
+            },
+            "description": "Cria um novo aluno com nome e senha"
+          },
+          "response": []
+        },
+        {
+          "name": "Listar Todos os Alunos",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{BASE_URL}}/api/alunos",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "api",
+                "alunos"
+              ]
+            },
+            "description": "Lista todos os alunos cadastrados (senhas não são retornadas)"
+          },
+          "response": []
+        },
+        {
+          "name": "Obter Aluno por ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{BASE_URL}}/api/alunos/{{ALUNO_ID}}",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "api",
+                "alunos",
+                "{{ALUNO_ID}}"
+              ]
+            },
+            "description": "Obtém um aluno específico pelo seu ID"
+          },
+          "response": []
+        },
+        {
+          "name": "Pesquisar Aluno por Nome",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{BASE_URL}}/api/alunos/nome/Maria",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "api",
+                "alunos",
+                "nome",
+                "Maria"
+              ]
+            },
+            "description": "Pesquisa alunos pelo nome (busca case-insensitive)"
+          },
+          "response": []
+        },
+        {
+          "name": "Atualizar Aluno",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"Maria Santos Atualizado\",\n  \"senha\": \"nova_senha\"\n}"
+            },
+            "url": {
+              "raw": "{{BASE_URL}}/api/alunos/{{ALUNO_ID}}",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "api",
+                "alunos",
+                "{{ALUNO_ID}}"
+              ]
+            },
+            "description": "Atualiza o nome e/ou senha de um aluno"
+          },
+          "response": []
+        },
+        {
+          "name": "Deletar Aluno",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{BASE_URL}}/api/alunos/{{ALUNO_ID}}",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "api",
+                "alunos",
+                "{{ALUNO_ID}}"
+              ]
+            },
+            "description": "Remove um aluno do banco de dados"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Professores",
+      "item": [
+        {
+          "name": "Criar Professor",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"João Silva\",\n  \"senha\": \"123456\"\n}"
+            },
+            "url": {
+              "raw": "{{BASE_URL}}/api/professores",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "api",
+                "professores"
+              ]
+            },
+            "description": "Cria um novo professor com nome e senha"
+          },
+          "response": []
+        },
+        {
+          "name": "Listar Todos os Professores",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{BASE_URL}}/api/professores",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "api",
+                "professores"
+              ]
+            },
+            "description": "Lista todos os professores cadastrados (senhas não são retornadas)"
+          },
+          "response": []
+        },
+        {
+          "name": "Obter Professor por ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{BASE_URL}}/api/professores/{{PROFESSOR_ID}}",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "api",
+                "professores",
+                "{{PROFESSOR_ID}}"
+              ]
+            },
+            "description": "Obtém um professor específico pelo seu ID"
+          },
+          "response": []
+        },
+        {
+          "name": "Pesquisar Professor por Nome",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{BASE_URL}}/api/professores/nome/João",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "api",
+                "professores",
+                "nome",
+                "João"
+              ]
+            },
+            "description": "Pesquisa professores pelo nome (busca case-insensitive)"
+          },
+          "response": []
+        },
+        {
+          "name": "Atualizar Professor",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"João Silva Atualizado\",\n  \"senha\": \"nova_senha\"\n}"
+            },
+            "url": {
+              "raw": "{{BASE_URL}}/api/professores/{{PROFESSOR_ID}}",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "api",
+                "professores",
+                "{{PROFESSOR_ID}}"
+              ]
+            },
+            "description": "Atualiza o nome e/ou senha de um professor"
+          },
+          "response": []
+        },
+        {
+          "name": "Deletar Professor",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{BASE_URL}}/api/professores/{{PROFESSOR_ID}}",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "api",
+                "professores",
+                "{{PROFESSOR_ID}}"
+              ]
+            },
+            "description": "Remove um professor do banco de dados"
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "BASE_URL",
+      "value": "http://localhost:3010",
+      "type": "string"
+    },
+    {
+      "key": "PROFESSOR_ID",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "ALUNO_ID",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "CURSO_ID",
+      "value": "",
+      "type": "string"
+    }
+  ]
+}
