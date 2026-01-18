@@ -7,6 +7,190 @@
   },
   "item": [
     {
+      "name": "Avaliações Alunos",
+      "item": [
+        {
+          "name": "Criar Avaliação Aluno",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nota\": 8.5,\n  \"observacoes\": \"Excelente desempenho, respeitou o tempo da prova\",\n  \"idAvaliacao\": \"{{AVALIACAO_ID}}\",\n  \"idAluno\": \"{{ALUNO_ID}}\"\n}"
+            },
+            "url": {
+              "raw": "{{BASE_URL}}/api/avaliacoes-alunos",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "api",
+                "avaliacoes-alunos"
+              ]
+            },
+            "description": "Cria um registro de avaliação para um aluno com nota (0-10) e observações opcionais"
+          },
+          "response": []
+        },
+        {
+          "name": "Listar Todas as Avaliações de Alunos",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{BASE_URL}}/api/avaliacoes-alunos",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "api",
+                "avaliacoes-alunos"
+              ]
+            },
+            "description": "Lista todas as avaliações de alunos com dados da avaliação e aluno"
+          },
+          "response": []
+        },
+        {
+          "name": "Obter Avaliação Aluno por ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{BASE_URL}}/api/avaliacoes-alunos/{{AVALIACAO_ALUNO_ID}}",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "api",
+                "avaliacoes-alunos",
+                "{{AVALIACAO_ALUNO_ID}}"
+              ]
+            },
+            "description": "Obtém uma avaliação de aluno específica pelo seu ID"
+          },
+          "response": []
+        },
+        {
+          "name": "Pesquisar Avaliações por ID da Avaliação",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{BASE_URL}}/api/avaliacoes-alunos/avaliacao/{{AVALIACAO_ID}}",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "api",
+                "avaliacoes-alunos",
+                "avaliacao",
+                "{{AVALIACAO_ID}}"
+              ]
+            },
+            "description": "Pesquisa todas as avaliações de alunos para uma avaliação específica"
+          },
+          "response": []
+        },
+        {
+          "name": "Pesquisar Avaliações por ID do Aluno",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{BASE_URL}}/api/avaliacoes-alunos/aluno/{{ALUNO_ID}}",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "api",
+                "avaliacoes-alunos",
+                "aluno",
+                "{{ALUNO_ID}}"
+              ]
+            },
+            "description": "Pesquisa todas as avaliações de um aluno específico"
+          },
+          "response": []
+        },
+        {
+          "name": "Atualizar Avaliação Aluno",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nota\": 9.0,\n  \"observacoes\": \"Excelente desempenho revisado\"\n}"
+            },
+            "url": {
+              "raw": "{{BASE_URL}}/api/avaliacoes-alunos/{{AVALIACAO_ALUNO_ID}}",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "api",
+                "avaliacoes-alunos",
+                "{{AVALIACAO_ALUNO_ID}}"
+              ]
+            },
+            "description": "Atualiza a nota e/ou observações de uma avaliação de aluno"
+          },
+          "response": []
+        },
+        {
+          "name": "Deletar Avaliação Aluno",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{BASE_URL}}/api/avaliacoes-alunos/{{AVALIACAO_ALUNO_ID}}",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "api",
+                "avaliacoes-alunos",
+                "{{AVALIACAO_ALUNO_ID}}"
+              ]
+            },
+            "description": "Remove uma avaliação de aluno do banco de dados"
+          },
+          "response": []
+        },
+        {
+          "name": "Resumo de Avaliações e Cursos de Reforço",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{BASE_URL}}/api/alunos/{{ALUNO_ID}}/resumo-avaliacoes",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "api",
+                "alunos",
+                "{{ALUNO_ID}}",
+                "resumo-avaliacoes"
+              ]
+            },
+            "description": "Retorna o ID do aluno, o ID da avaliação que teve nota inferior a 7 e o curso de reforço sugerido"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
       "name": "Avaliações",
       "item": [
         {
@@ -598,6 +782,11 @@
     },
     {
       "key": "AVALIACAO_ID",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "AVALIACAO_ALUNO_ID",
       "value": "",
       "type": "string"
     }
