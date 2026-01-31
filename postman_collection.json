@@ -330,7 +330,7 @@
           "response": []
         },
         {
-          "name": "Resumo de Avaliações e Cursos de Reforço",
+          "name": "Avaliações para Reforço",
           "request": {
             "method": "GET",
             "header": [
@@ -351,7 +351,7 @@
                 "resumo-avaliacoes"
               ]
             },
-            "description": "Retorna o resumo das avaliações com cursos de reforço (ENDPOINT EXCLUSIVO PARA ALUNOS)"
+            "description": "Retorna as avaliações com notas < 7 e cursos de reforço sugeridos (ENDPOINT EXCLUSIVO PARA ALUNOS)"
           },
           "response": []
         }

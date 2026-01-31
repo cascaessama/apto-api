@@ -195,8 +195,8 @@ router.delete('/avaliacoes-alunos/:id', authMiddleware, professorOnly, async (re
   }
 });
 
-// Endpoint: Obter resumo de avaliações por curso e cursos de reforço
-// Endpoint: Obter resumo de avaliações por curso e cursos de reforço
+// Endpoint: Obter avaliações para reforço (notas < 7) com cursos de reforço sugeridos
+// Endpoint: Obter avaliações para reforço (notas < 7) com cursos de reforço sugeridos
 router.get('/alunos/:idAluno/resumo-avaliacoes', authMiddleware, alunoOnly, async (req: AuthRequest, res: Response) => {
   try {
     const { idAluno } = req.params;
@@ -214,7 +214,10 @@ router.get('/alunos/:idAluno/resumo-avaliacoes', authMiddleware, alunoOnly, asyn
         path: 'idAvaliacao',
         populate: {
           path: 'idCurso',
-          populate: { path: 'idProfessor', select: '-senha' }
+          populate: [
+            { path: 'idProfessor', select: '-senha' },
+            { path: 'idCursoReforco' }
+          ]
         }
       },
       { path: 'idAluno', select: '-senha' }
@@ -278,12 +281,20 @@ router.get('/alunos/:idAluno/resumo-avaliacoes', authMiddleware, alunoOnly, asyn
       const cursoReforcoData = curso.idCursoReforco;
 
       if (avaliacaoAluno.nota < 7 && cursoReforcoData) {
+        const nomeReforco = (cursoReforcoData as any).nome || 'Curso de Reforço';
+        
         avaliacoesComReforco.push({
           idAvaliacao: avaliacaoAluno._id,
+          nomeAvaliacao: avaliacaoPop.nome,
+          dataAvaliacao: avaliacaoPop.dataAvaliacao,
+          nomeCurso: curso.nome,
+          nota: avaliacaoAluno.nota,
+          observacoes: avaliacaoAluno.observacoes,
+          nomeReforco: nomeReforco,
           cursoReforco: {
             id: cursoReforcoData._id,
-            nome: cursoReforcoData.nome,
-            descricao: cursoReforcoData.descricao
+            nome: nomeReforco,
+            descricao: (cursoReforcoData as any).descricao
           }
         });
       }
@@ -295,7 +306,7 @@ router.get('/alunos/:idAluno/resumo-avaliacoes', authMiddleware, alunoOnly, asyn
     });
   } catch (erro) {
     console.error(erro);
-    res.status(500).json({ erro: 'Erro ao gerar resumo de avaliações' });
+    res.status(500).json({ erro: 'Erro ao gerar avaliações para reforço' });
   }
 });
 
