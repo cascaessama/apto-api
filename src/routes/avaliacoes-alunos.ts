@@ -138,7 +138,7 @@ router.get('/avaliacoes-alunos/:id', authMiddleware, professorOnly, async (req: 
 // Atualizar avaliação aluno (Apenas Professores)
 router.put('/avaliacoes-alunos/:id', authMiddleware, professorOnly, async (req: AuthRequest, res: Response) => {
   try {
-    const { observacoes, nota } = req.body;
+    const { observacoes, nota, idAvaliacao, idAluno } = req.body;
 
     const avaliacaoAluno = await AvaliacaoAluno.findById(req.params.id);
 
@@ -153,6 +153,22 @@ router.put('/avaliacoes-alunos/:id', authMiddleware, professorOnly, async (req: 
         return res.status(400).json({ erro: 'Nota deve estar entre 0 e 10' });
       }
       avaliacaoAluno.nota = nota;
+    }
+
+    if (idAvaliacao !== undefined) {
+      const avaliacao = await Avaliacao.findById(idAvaliacao);
+      if (!avaliacao) {
+        return res.status(404).json({ erro: 'Avaliação não encontrada' });
+      }
+      avaliacaoAluno.idAvaliacao = idAvaliacao;
+    }
+
+    if (idAluno !== undefined) {
+      const aluno = await Aluno.findById(idAluno);
+      if (!aluno) {
+        return res.status(404).json({ erro: 'Aluno não encontrado' });
+      }
+      avaliacaoAluno.idAluno = idAluno;
     }
 
     await avaliacaoAluno.save();
@@ -175,7 +191,10 @@ router.put('/avaliacoes-alunos/:id', authMiddleware, professorOnly, async (req: 
       idAluno: avaliacaoAluno.idAluno,
       mensagem: 'Avaliação do aluno atualizada com sucesso'
     });
-  } catch (erro) {
+  } catch (erro: any) {
+    if (erro.code === 11000) {
+      return res.status(400).json({ erro: 'Este aluno já possui uma avaliação registrada para esta avaliação' });
+    }
     res.status(500).json({ erro: 'Erro ao atualizar avaliação do aluno' });
   }
 });
