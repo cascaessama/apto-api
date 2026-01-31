@@ -2,11 +2,12 @@ import { Router, Request, Response } from 'express';
 import { AvaliacaoAluno } from '../models/AvaliacaoAluno';
 import { Avaliacao } from '../models/Avaliacao';
 import { Aluno } from '../models/Aluno';
+import { AuthRequest, authMiddleware, alunoOnly, professorOnly } from '../middleware/auth';
 
 const router = Router();
 
 // Criar avaliação aluno
-router.post('/avaliacoes-alunos', async (req: Request, res: Response) => {
+router.post('/avaliacoes-alunos', authMiddleware, async (req: AuthRequest, res: Response) => {
   try {
     const { observacoes, nota, idAvaliacao, idAluno } = req.body;
 
@@ -65,8 +66,8 @@ router.post('/avaliacoes-alunos', async (req: Request, res: Response) => {
   }
 });
 
-// Listar todas as avaliações de alunos
-router.get('/avaliacoes-alunos', async (req: Request, res: Response) => {
+// Listar todas as avaliações de alunos (Apenas Professores)
+router.get('/avaliacoes-alunos', authMiddleware, professorOnly, async (req: AuthRequest, res: Response) => {
   try {
     const avaliacoesAlunos = await AvaliacaoAluno.find().populate([
       {
@@ -84,32 +85,8 @@ router.get('/avaliacoes-alunos', async (req: Request, res: Response) => {
   }
 });
 
-// Obter avaliação aluno por ID
-router.get('/avaliacoes-alunos/:id', async (req: Request, res: Response) => {
-  try {
-    const avaliacaoAluno = await AvaliacaoAluno.findById(req.params.id).populate([
-      {
-        path: 'idAvaliacao',
-        populate: {
-          path: 'idCurso',
-          populate: { path: 'idProfessor', select: '-senha' }
-        }
-      },
-      { path: 'idAluno', select: '-senha' }
-    ]);
-
-    if (!avaliacaoAluno) {
-      return res.status(404).json({ erro: 'Avaliação do aluno não encontrada' });
-    }
-
-    res.json(avaliacaoAluno);
-  } catch (erro) {
-    res.status(500).json({ erro: 'Erro ao buscar avaliação do aluno' });
-  }
-});
-
-// Pesquisar avaliações alunos por ID da avaliação
-router.get('/avaliacoes-alunos/avaliacao/:idAvaliacao', async (req: Request, res: Response) => {
+// Pesquisar avaliações alunos por ID da avaliação (Apenas Professores)
+router.get('/avaliacoes-alunos/avaliacao/:idAvaliacao', authMiddleware, professorOnly, async (req: AuthRequest, res: Response) => {
   try {
     const avaliacoesAlunos = await AvaliacaoAluno.find({
       idAvaliacao: req.params.idAvaliacao
@@ -134,12 +111,10 @@ router.get('/avaliacoes-alunos/avaliacao/:idAvaliacao', async (req: Request, res
   }
 });
 
-// Pesquisar avaliações alunos por ID do aluno
-router.get('/avaliacoes-alunos/aluno/:idAluno', async (req: Request, res: Response) => {
+// Obter avaliação aluno por ID (Apenas Professores)
+router.get('/avaliacoes-alunos/:id', authMiddleware, professorOnly, async (req: AuthRequest, res: Response) => {
   try {
-    const avaliacoesAlunos = await AvaliacaoAluno.find({
-      idAluno: req.params.idAluno
-    }).populate([
+    const avaliacaoAluno = await AvaliacaoAluno.findById(req.params.id).populate([
       {
         path: 'idAvaliacao',
         populate: {
@@ -150,18 +125,18 @@ router.get('/avaliacoes-alunos/aluno/:idAluno', async (req: Request, res: Respon
       { path: 'idAluno', select: '-senha' }
     ]);
 
-    if (avaliacoesAlunos.length === 0) {
-      return res.status(404).json({ erro: 'Nenhuma avaliação encontrada para este aluno' });
+    if (!avaliacaoAluno) {
+      return res.status(404).json({ erro: 'Avaliação do aluno não encontrada' });
     }
 
-    res.json(avaliacoesAlunos);
+    res.json(avaliacaoAluno);
   } catch (erro) {
-    res.status(500).json({ erro: 'Erro ao pesquisar avaliações do aluno' });
+    res.status(500).json({ erro: 'Erro ao buscar avaliação do aluno' });
   }
 });
 
-// Atualizar avaliação aluno
-router.put('/avaliacoes-alunos/:id', async (req: Request, res: Response) => {
+// Atualizar avaliação aluno (Apenas Professores)
+router.put('/avaliacoes-alunos/:id', authMiddleware, professorOnly, async (req: AuthRequest, res: Response) => {
   try {
     const { observacoes, nota } = req.body;
 
@@ -205,8 +180,8 @@ router.put('/avaliacoes-alunos/:id', async (req: Request, res: Response) => {
   }
 });
 
-// Deletar avaliação aluno
-router.delete('/avaliacoes-alunos/:id', async (req: Request, res: Response) => {
+// Deletar avaliação aluno (Apenas Professores)
+router.delete('/avaliacoes-alunos/:id', authMiddleware, professorOnly, async (req: AuthRequest, res: Response) => {
   try {
     const avaliacaoAluno = await AvaliacaoAluno.findByIdAndDelete(req.params.id);
 
@@ -221,9 +196,15 @@ router.delete('/avaliacoes-alunos/:id', async (req: Request, res: Response) => {
 });
 
 // Endpoint: Obter resumo de avaliações por curso e cursos de reforço
-router.get('/alunos/:idAluno/resumo-avaliacoes', async (req: Request, res: Response) => {
+// Endpoint: Obter resumo de avaliações por curso e cursos de reforço
+router.get('/alunos/:idAluno/resumo-avaliacoes', authMiddleware, alunoOnly, async (req: AuthRequest, res: Response) => {
   try {
     const { idAluno } = req.params;
+
+    // Verificar se o aluno está acessando apenas seus próprios dados
+    if (req.user?.id !== idAluno) {
+      return res.status(403).json({ erro: 'Você só pode acessar suas próprias avaliações' });
+    }
 
     // Buscar todas as avaliações do aluno com dados completos
     const avaliacoesAluno = await AvaliacaoAluno.find({
@@ -243,26 +224,60 @@ router.get('/alunos/:idAluno/resumo-avaliacoes', async (req: Request, res: Respo
       return res.status(404).json({ erro: 'Nenhuma avaliação encontrada para este aluno' });
     }
 
-    // Agrupar por curso e pegar a última avaliação de cada um
-    const cursoMap = new Map();
+    // Agrupar por curso e pegar a última avaliação de cada um (ignora registros com dados faltantes)
+    const cursoMap = new Map<string, any>();
 
     for (const avaliacaoAluno of avaliacoesAluno) {
-      const cursoId = (avaliacaoAluno.idAvaliacao as any).idCurso._id.toString();
+      try {
+        const avaliacaoPop = avaliacaoAluno.idAvaliacao as any;
 
-      if (!cursoMap.has(cursoId)) {
-        cursoMap.set(cursoId, avaliacaoAluno);
+        // Verifica se a avaliação está populada e é um objeto
+        if (!avaliacaoPop || typeof avaliacaoPop !== 'object') {
+          console.warn(`Avaliação referenciada inválida para AvaliacaoAluno ${avaliacaoAluno._id}:`, avaliacaoPop);
+          continue;
+        }
+
+        const curso = avaliacaoPop.idCurso;
+
+        // Verifica se o curso da avaliação está populado e é um objeto
+        if (!curso || typeof curso !== 'object') {
+          console.warn(`Curso inválido para Avaliação ${avaliacaoPop._id} (AvaliacaoAluno ${avaliacaoAluno._id}):`, curso);
+          continue;
+        }
+
+        const cursoId = curso._id ? String(curso._id) : String(curso);
+
+        if (!cursoMap.has(cursoId)) {
+          cursoMap.set(cursoId, avaliacaoAluno);
+        }
+      } catch (err: any) {
+        // Log detalhado para identificar o registro problemático
+        try {
+          console.error('Erro ao processar AvaliacaoAluno:', {
+            idAvaliacaoAluno: avaliacaoAluno._id,
+            idAvaliacao: (avaliacaoAluno as any).idAvaliacao,
+            erro: err && err.message ? err.message : err
+          });
+        } catch (e) {
+          console.error('Erro ao logar AvaliacaoAluno problemático e falha adicional:', e);
+        }
+
+        continue;
       }
     }
 
     // Filtrar apenas avaliações com nota < 7 e com curso de reforço
-    const avaliacoesComReforco = [];
+    const avaliacoesComReforco: Array<any> = [];
 
     for (const [cursoId, avaliacaoAluno] of cursoMap) {
-      const curso = (avaliacaoAluno.idAvaliacao as any).idCurso;
+      const avaliacaoPop = avaliacaoAluno.idAvaliacao as any;
+      const curso = avaliacaoPop ? avaliacaoPop.idCurso : null;
 
-      if (avaliacaoAluno.nota < 7 && curso.idCursoReforco) {
-        const cursoReforcoData = curso.idCursoReforco;
-        
+      if (!curso) continue;
+
+      const cursoReforcoData = curso.idCursoReforco;
+
+      if (avaliacaoAluno.nota < 7 && cursoReforcoData) {
         avaliacoesComReforco.push({
           idAvaliacao: avaliacaoAluno._id,
           cursoReforco: {
@@ -281,6 +296,39 @@ router.get('/alunos/:idAluno/resumo-avaliacoes', async (req: Request, res: Respo
   } catch (erro) {
     console.error(erro);
     res.status(500).json({ erro: 'Erro ao gerar resumo de avaliações' });
+  }
+});
+
+// Pesquisar avaliações alunos por ID do aluno (com autenticação)
+router.get('/avaliacoes-alunos/aluno/:idAluno', authMiddleware, alunoOnly, async (req: AuthRequest, res: Response) => {
+  try {
+    const { idAluno } = req.params;
+
+    // Verificar se o aluno está acessando apenas seus próprios dados
+    if (req.user?.id !== idAluno) {
+      return res.status(403).json({ erro: 'Você só pode acessar suas próprias avaliações' });
+    }
+
+    const avaliacoesAlunos = await AvaliacaoAluno.find({
+      idAluno: req.params.idAluno
+    }).populate([
+      {
+        path: 'idAvaliacao',
+        populate: {
+          path: 'idCurso',
+          populate: { path: 'idProfessor', select: '-senha' }
+        }
+      },
+      { path: 'idAluno', select: '-senha' }
+    ]);
+
+    if (avaliacoesAlunos.length === 0) {
+      return res.status(404).json({ erro: 'Nenhuma avaliação encontrada para este aluno' });
+    }
+
+    res.json(avaliacoesAlunos);
+  } catch (erro) {
+    res.status(500).json({ erro: 'Erro ao pesquisar avaliações do aluno' });
   }
 });
 

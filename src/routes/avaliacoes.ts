@@ -1,11 +1,12 @@
 import { Router, Request, Response } from 'express';
 import { Avaliacao } from '../models/Avaliacao';
 import { Curso } from '../models/Curso';
+import { authMiddleware, professorOnly, AuthRequest } from '../middleware/auth';
 
 const router = Router();
 
-// Criar avaliação
-router.post('/avaliacoes', async (req: Request, res: Response) => {
+// Criar avaliação (Apenas Professores)
+router.post('/avaliacoes', authMiddleware, professorOnly, async (req: AuthRequest, res: Response) => {
   try {
     const { nome, descricao, dataAvaliacao, idCurso } = req.body;
 
@@ -52,8 +53,8 @@ router.post('/avaliacoes', async (req: Request, res: Response) => {
   }
 });
 
-// Listar todas as avaliações
-router.get('/avaliacoes', async (req: Request, res: Response) => {
+// Listar todas as avaliações (Apenas Professores)
+router.get('/avaliacoes', authMiddleware, professorOnly, async (req: AuthRequest, res: Response) => {
   try {
     const avaliacoes = await Avaliacao.find().populate({
       path: 'idCurso',
@@ -65,8 +66,8 @@ router.get('/avaliacoes', async (req: Request, res: Response) => {
   }
 });
 
-// Obter avaliação por ID
-router.get('/avaliacoes/:id', async (req: Request, res: Response) => {
+// Obter avaliação por ID (Apenas Professores)
+router.get('/avaliacoes/:id', authMiddleware, professorOnly, async (req: AuthRequest, res: Response) => {
   try {
     const avaliacao = await Avaliacao.findById(req.params.id).populate({
       path: 'idCurso',
@@ -83,8 +84,8 @@ router.get('/avaliacoes/:id', async (req: Request, res: Response) => {
   }
 });
 
-// Pesquisar avaliação por nome
-router.get('/avaliacoes/nome/:nome', async (req: Request, res: Response) => {
+// Pesquisar avaliação por nome (Apenas Professores)
+router.get('/avaliacoes/nome/:nome', authMiddleware, professorOnly, async (req: AuthRequest, res: Response) => {
   try {
     const avaliacoes = await Avaliacao.find({
       nome: { $regex: req.params.nome, $options: 'i' }
@@ -103,8 +104,8 @@ router.get('/avaliacoes/nome/:nome', async (req: Request, res: Response) => {
   }
 });
 
-// Atualizar avaliação
-router.put('/avaliacoes/:id', async (req: Request, res: Response) => {
+// Atualizar avaliação (Apenas Professores)
+router.put('/avaliacoes/:id', authMiddleware, professorOnly, async (req: AuthRequest, res: Response) => {
   try {
     const { nome, descricao, dataAvaliacao, idCurso } = req.body;
 
@@ -156,8 +157,8 @@ router.put('/avaliacoes/:id', async (req: Request, res: Response) => {
   }
 });
 
-// Deletar avaliação
-router.delete('/avaliacoes/:id', async (req: Request, res: Response) => {
+// Deletar avaliação (Apenas Professores)
+router.delete('/avaliacoes/:id', authMiddleware, professorOnly, async (req: AuthRequest, res: Response) => {
   try {
     const avaliacao = await Avaliacao.findByIdAndDelete(req.params.id);
 

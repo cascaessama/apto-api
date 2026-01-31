@@ -1,11 +1,12 @@
 import { Router, Request, Response } from 'express';
 import { Curso } from '../models/Curso';
 import { Professor } from '../models/Professor';
+import { authMiddleware, professorOnly, AuthRequest } from '../middleware/auth';
 
 const router = Router();
 
-// Criar curso
-router.post('/cursos', async (req: Request, res: Response) => {
+// Criar curso (Apenas Professores)
+router.post('/cursos', authMiddleware, professorOnly, async (req: AuthRequest, res: Response) => {
   try {
     const { nome, descricao, idCursoReforco, idProfessor } = req.body;
 
@@ -60,8 +61,8 @@ router.post('/cursos', async (req: Request, res: Response) => {
   }
 });
 
-// Listar todos os cursos
-router.get('/cursos', async (req: Request, res: Response) => {
+// Listar todos os cursos (Apenas Professores)
+router.get('/cursos', authMiddleware, professorOnly, async (req: AuthRequest, res: Response) => {
   try {
     const cursos = await Curso.find().populate([
       { path: 'idProfessor', select: '-senha' },
@@ -73,8 +74,8 @@ router.get('/cursos', async (req: Request, res: Response) => {
   }
 });
 
-// Obter curso por ID
-router.get('/cursos/:id', async (req: Request, res: Response) => {
+// Obter curso por ID (Apenas Professores)
+router.get('/cursos/:id', authMiddleware, professorOnly, async (req: AuthRequest, res: Response) => {
   try {
     const curso = await Curso.findById(req.params.id).populate([
       { path: 'idProfessor', select: '-senha' },
@@ -91,8 +92,8 @@ router.get('/cursos/:id', async (req: Request, res: Response) => {
   }
 });
 
-// Pesquisar curso por nome
-router.get('/cursos/nome/:nome', async (req: Request, res: Response) => {
+// Pesquisar curso por nome (Apenas Professores)
+router.get('/cursos/nome/:nome', authMiddleware, professorOnly, async (req: AuthRequest, res: Response) => {
   try {
     const cursos = await Curso.find({
       nome: { $regex: req.params.nome, $options: 'i' }
@@ -111,8 +112,8 @@ router.get('/cursos/nome/:nome', async (req: Request, res: Response) => {
   }
 });
 
-// Atualizar curso
-router.put('/cursos/:id', async (req: Request, res: Response) => {
+// Atualizar curso (Apenas Professores)
+router.put('/cursos/:id', authMiddleware, professorOnly, async (req: AuthRequest, res: Response) => {
   try {
     const { nome, descricao, idCursoReforco, idProfessor } = req.body;
 
@@ -173,8 +174,8 @@ router.put('/cursos/:id', async (req: Request, res: Response) => {
   }
 });
 
-// Deletar curso
-router.delete('/cursos/:id', async (req: Request, res: Response) => {
+// Deletar curso (Apenas Professores)
+router.delete('/cursos/:id', authMiddleware, professorOnly, async (req: AuthRequest, res: Response) => {
   try {
     const curso = await Curso.findByIdAndDelete(req.params.id);
 

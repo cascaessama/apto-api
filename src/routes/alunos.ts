@@ -1,10 +1,58 @@
 import { Router, Request, Response } from 'express';
+import jwt from 'jsonwebtoken';
+import bcryptjs from 'bcryptjs';
 import { Aluno } from '../models/Aluno';
+import { AuthRequest, authMiddleware, alunoOnly } from '../middleware/auth';
 
 const router = Router();
 
+// Login aluno
+router.post('/alunos/login', async (req: Request, res: Response) => {
+  try {
+    const { nome, senha } = req.body;
+
+    if (!nome || !senha) {
+      return res.status(400).json({ erro: 'Nome e senha são obrigatórios' });
+    }
+
+    const aluno = await Aluno.findOne({ nome });
+    
+    if (!aluno) {
+      return res.status(404).json({ erro: 'Aluno não encontrado' });
+    }
+
+    const senhaValida = await bcryptjs.compare(senha, aluno.senha);
+    
+    if (!senhaValida) {
+      return res.status(401).json({ erro: 'Senha incorreta' });
+    }
+
+    const token = jwt.sign(
+      {
+        id: aluno._id,
+        tipo: 'aluno',
+        nome: aluno.nome
+      },
+      process.env.JWT_SECRET || 'fiap25',
+      { expiresIn: '24h' }
+    );
+
+    res.json({
+      mensagem: 'Login realizado com sucesso',
+      token,
+      usuario: {
+        id: aluno._id,
+        nome: aluno.nome,
+        tipo: 'aluno'
+      }
+    });
+  } catch (erro) {
+    res.status(500).json({ erro: 'Erro ao realizar login' });
+  }
+});
+
 // Criar aluno
-router.post('/alunos', async (req: Request, res: Response) => {
+router.post('/alunos', authMiddleware, async (req: AuthRequest, res: Response) => {
   try {
     const { nome, senha } = req.body;
 
@@ -29,7 +77,7 @@ router.post('/alunos', async (req: Request, res: Response) => {
 });
 
 // Listar todos os alunos
-router.get('/alunos', async (req: Request, res: Response) => {
+router.get('/alunos', authMiddleware, async (req: AuthRequest, res: Response) => {
   try {
     const alunos = await Aluno.find().select('-senha');
     res.json(alunos);
@@ -39,7 +87,7 @@ router.get('/alunos', async (req: Request, res: Response) => {
 });
 
 // Obter aluno por ID
-router.get('/alunos/:id', async (req: Request, res: Response) => {
+router.get('/alunos/:id', authMiddleware, async (req: AuthRequest, res: Response) => {
   try {
     const aluno = await Aluno.findById(req.params.id).select('-senha');
     
@@ -54,7 +102,7 @@ router.get('/alunos/:id', async (req: Request, res: Response) => {
 });
 
 // Pesquisar aluno por nome
-router.get('/alunos/nome/:nome', async (req: Request, res: Response) => {
+router.get('/alunos/nome/:nome', authMiddleware, async (req: AuthRequest, res: Response) => {
   try {
     const alunos = await Aluno.find({
       nome: { $regex: req.params.nome, $options: 'i' }
@@ -71,7 +119,7 @@ router.get('/alunos/nome/:nome', async (req: Request, res: Response) => {
 });
 
 // Atualizar aluno
-router.put('/alunos/:id', async (req: Request, res: Response) => {
+router.put('/alunos/:id', authMiddleware, async (req: AuthRequest, res: Response) => {
   try {
     const { nome, senha } = req.body;
 
@@ -100,7 +148,7 @@ router.put('/alunos/:id', async (req: Request, res: Response) => {
 });
 
 // Deletar aluno
-router.delete('/alunos/:id', async (req: Request, res: Response) => {
+router.delete('/alunos/:id', authMiddleware, async (req: AuthRequest, res: Response) => {
   try {
     const aluno = await Aluno.findByIdAndDelete(req.params.id);
 

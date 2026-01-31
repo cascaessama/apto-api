@@ -1,10 +1,58 @@
 import { Router, Request, Response } from 'express';
+import jwt from 'jsonwebtoken';
+import bcryptjs from 'bcryptjs';
 import { Professor } from '../models/Professor';
+import { AuthRequest, authMiddleware, professorOnly } from '../middleware/auth';
 
 const router = Router();
 
+// Login professor
+router.post('/professores/login', async (req: Request, res: Response) => {
+  try {
+    const { nome, senha } = req.body;
+
+    if (!nome || !senha) {
+      return res.status(400).json({ erro: 'Nome e senha são obrigatórios' });
+    }
+
+    const professor = await Professor.findOne({ nome });
+    
+    if (!professor) {
+      return res.status(404).json({ erro: 'Professor não encontrado' });
+    }
+
+    const senhaValida = await bcryptjs.compare(senha, professor.senha);
+    
+    if (!senhaValida) {
+      return res.status(401).json({ erro: 'Senha incorreta' });
+    }
+
+    const token = jwt.sign(
+      {
+        id: professor._id,
+        tipo: 'professor',
+        nome: professor.nome
+      },
+      process.env.JWT_SECRET || 'fiap25',
+      { expiresIn: '24h' }
+    );
+
+    res.json({
+      mensagem: 'Login realizado com sucesso',
+      token,
+      usuario: {
+        id: professor._id,
+        nome: professor.nome,
+        tipo: 'professor'
+      }
+    });
+  } catch (erro) {
+    res.status(500).json({ erro: 'Erro ao realizar login' });
+  }
+});
+
 // Criar professor
-router.post('/professores', async (req: Request, res: Response) => {
+router.post('/professores', authMiddleware, professorOnly, async (req: AuthRequest, res: Response) => {
   try {
     const { nome, senha } = req.body;
 
@@ -29,7 +77,7 @@ router.post('/professores', async (req: Request, res: Response) => {
 });
 
 // Listar todos os professores
-router.get('/professores', async (req: Request, res: Response) => {
+router.get('/professores', authMiddleware, professorOnly, async (req: AuthRequest, res: Response) => {
   try {
     const professores = await Professor.find().select('-senha');
     res.json(professores);
@@ -39,7 +87,7 @@ router.get('/professores', async (req: Request, res: Response) => {
 });
 
 // Obter professor por ID
-router.get('/professores/:id', async (req: Request, res: Response) => {
+router.get('/professores/:id', authMiddleware, professorOnly, async (req: AuthRequest, res: Response) => {
   try {
     const professor = await Professor.findById(req.params.id).select('-senha');
     
@@ -54,7 +102,7 @@ router.get('/professores/:id', async (req: Request, res: Response) => {
 });
 
 // Pesquisar professor por nome
-router.get('/professores/nome/:nome', async (req: Request, res: Response) => {
+router.get('/professores/nome/:nome', authMiddleware, professorOnly, async (req: AuthRequest, res: Response) => {
   try {
     const professores = await Professor.find({
       nome: { $regex: req.params.nome, $options: 'i' }
@@ -71,7 +119,7 @@ router.get('/professores/nome/:nome', async (req: Request, res: Response) => {
 });
 
 // Atualizar professor
-router.put('/professores/:id', async (req: Request, res: Response) => {
+router.put('/professores/:id', authMiddleware, professorOnly, async (req: AuthRequest, res: Response) => {
   try {
     const { nome, senha } = req.body;
 
@@ -100,7 +148,7 @@ router.put('/professores/:id', async (req: Request, res: Response) => {
 });
 
 // Deletar professor
-router.delete('/professores/:id', async (req: Request, res: Response) => {
+router.delete('/professores/:id', authMiddleware, professorOnly, async (req: AuthRequest, res: Response) => {
   try {
     const professor = await Professor.findByIdAndDelete(req.params.id);
 
