@@ -90,24 +90,78 @@ router.get('/professores', authMiddleware, professorOnly, async (req: AuthReques
 // Buscar alunos com reforço
 router.get('/professores/alunos-reforco', authMiddleware, professorOnly, async (req: AuthRequest, res: Response) => {
   try {
-    // Buscar todas as avaliações do aluno com nota < 7
-    const avaliacoesComReforco = await AvaliacaoAluno.find({
-      nota: { $lt: 7 }
-    })
-    .populate('idAluno', '-senha')
-    .populate({
-      path: 'idAvaliacao',
-      populate: {
-        path: 'idCurso',
-        select: 'nome idProfessor idCursoReforco'
-      }
-    });
+    // Usar agregação para obter apenas a última avaliação para cada aluno/curso com nota < 7
+    const avaliacoesComReforco = await AvaliacaoAluno.aggregate([
+      // 1. Fazer populate de idAvaliacao primeiro para acessar dados de curso e data
+      {
+        $lookup: {
+          from: 'avaliacaos',
+          localField: 'idAvaliacao',
+          foreignField: '_id',
+          as: 'idAvaliacao'
+        }
+      },
+      { $unwind: '$idAvaliacao' },
+      
+      // 2. Ordenar por aluno, curso e data (descendente para pegar o mais recente)
+      { $sort: { idAluno: 1, 'idAvaliacao.idCurso': 1, 'idAvaliacao.dataAvaliacao': -1 } },
+      
+      // 3. Agrupar por aluno e curso, mantendo apenas o primeiro (mais recente - independente da nota)
+      {
+        $group: {
+          _id: { idAluno: '$idAluno', idCurso: '$idAvaliacao.idCurso' },
+          doc: { $first: '$$ROOT' }
+        }
+      },
+      
+      // 4. Substituir pela avaliação mantida
+      { $replaceRoot: { newRoot: '$doc' } },
+      
+      // 5. Filtrar por nota < 7 (apenas as avaliações mais recentes)
+      { $match: { nota: { $lt: 7 } } },
+      
+      // 6. Fazer populate de idAluno
+      {
+        $lookup: {
+          from: 'alunos',
+          localField: 'idAluno',
+          foreignField: '_id',
+          as: 'idAluno'
+        }
+      },
+      { $unwind: '$idAluno' },
+      
+      // 7. Remover senha do aluno
+      { $project: { 'idAluno.senha': 0 } },
+      
+      // 8. Fazer populate de idCurso dentro de idAvaliacao
+      {
+        $lookup: {
+          from: 'cursos',
+          localField: 'idAvaliacao.idCurso',
+          foreignField: '_id',
+          as: 'idAvaliacao.idCurso'
+        }
+      },
+      { $unwind: '$idAvaliacao.idCurso' },
+      
+      // 9. Fazer populate de idCursoReforco
+      {
+        $lookup: {
+          from: 'cursos',
+          localField: 'idAvaliacao.idCurso.idCursoReforco',
+          foreignField: '_id',
+          as: 'idAvaliacao.idCurso.idCursoReforco'
+        }
+      },
+      { $unwind: { path: '$idAvaliacao.idCurso.idCursoReforco', preserveNullAndEmptyArrays: true } }
+    ]);
 
     if (avaliacoesComReforco.length === 0) {
       return res.status(404).json({ erro: 'Nenhum aluno necessita de reforço' });
     }
 
-    // Agrupar por aluno
+    // Agrupar novamente por aluno para a resposta final
     const alunoMap = new Map<string, any>();
 
     for (const avaliacao of avaliacoesComReforco) {
@@ -128,6 +182,15 @@ router.get('/professores/alunos-reforco', authMiddleware, professorOnly, async (
         const aluno = alunoMap.get(alunoId);
         const avaliacaoPop = avaliacao.idAvaliacao as any;
         const curso = avaliacaoPop?.idCurso as any;
+        
+        // Obter dados do curso de reforço
+        let cursoReforcoData = null;
+        if (curso?.idCursoReforco) {
+          cursoReforcoData = {
+            id: curso.idCursoReforco._id,
+            nome: curso.idCursoReforco.nome
+          };
+        }
 
         aluno.avaliacoes.push({
           idAvaliacao: avaliacao._id,
@@ -136,7 +199,7 @@ router.get('/professores/alunos-reforco', authMiddleware, professorOnly, async (
           nomeCurso: curso?.nome || 'Sem curso',
           nota: avaliacao.nota,
           observacoes: avaliacao.observacoes,
-          cursoReforco: null
+          cursoReforco: cursoReforcoData
         });
       } catch (itemError) {
         // Continuar processando outros itens

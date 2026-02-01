@@ -273,17 +273,7 @@ router.get('/alunos/:idAluno/resumo-avaliacoes', authMiddleware, alunoOnly, asyn
           cursoMap.set(cursoId, avaliacaoAluno);
         }
       } catch (err: any) {
-        // Log detalhado para identificar o registro problemático
-        try {
-          console.error('Erro ao processar AvaliacaoAluno:', {
-            idAvaliacaoAluno: avaliacaoAluno._id,
-            idAvaliacao: (avaliacaoAluno as any).idAvaliacao,
-            erro: err && err.message ? err.message : err
-          });
-        } catch (e) {
-          console.error('Erro ao logar AvaliacaoAluno problemático e falha adicional:', e);
-        }
-
+        // Ignorar registros problemáticos
         continue;
       }
     }
@@ -324,7 +314,6 @@ router.get('/alunos/:idAluno/resumo-avaliacoes', authMiddleware, alunoOnly, asyn
       avaliacoesComReforco
     });
   } catch (erro) {
-    console.error(erro);
     res.status(500).json({ erro: 'Erro ao gerar avaliações para reforço' });
   }
 });

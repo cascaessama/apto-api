@@ -24,10 +24,14 @@ router.post('/avaliacoes', authMiddleware, professorOnly, async (req: AuthReques
       return res.status(404).json({ erro: 'Curso não encontrado' });
     }
 
+    // Converter data: recebe como YYYY-MM-DD e converte para às 00:00:00 do mesmo dia
+    const dataParts = dataAvaliacao.split('T')[0].split('-');
+    const dataConverted = new Date(parseInt(dataParts[0]), parseInt(dataParts[1]) - 1, parseInt(dataParts[2]));
+
     const novaAvaliacao = new Avaliacao({
       nome,
       descricao,
-      dataAvaliacao,
+      dataAvaliacao: dataConverted,
       idCurso
     });
 
@@ -124,7 +128,11 @@ router.put('/avaliacoes/:id', authMiddleware, professorOnly, async (req: AuthReq
       avaliacao.descricao = descricao;
     }
 
-    if (dataAvaliacao) avaliacao.dataAvaliacao = dataAvaliacao;
+    if (dataAvaliacao) {
+      // Converter data: recebe como YYYY-MM-DD e converte para às 00:00:00 do mesmo dia
+      const dataParts = dataAvaliacao.split('T')[0].split('-');
+      avaliacao.dataAvaliacao = new Date(parseInt(dataParts[0]), parseInt(dataParts[1]) - 1, parseInt(dataParts[2]));
+    }
 
     if (idCurso) {
       // Verificar se o novo curso existe

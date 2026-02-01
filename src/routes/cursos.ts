@@ -14,10 +14,6 @@ router.post('/cursos', authMiddleware, professorOnly, async (req: AuthRequest, r
       return res.status(400).json({ erro: 'Nome, descrição e ID do professor são obrigatórios' });
     }
 
-    if (!idCursoReforco) {
-      return res.status(400).json({ erro: 'Curso de reforço é obrigatório' });
-    }
-
     if (descricao.length > 500) {
       return res.status(400).json({ erro: 'Descrição não pode exceder 500 caracteres' });
     }
@@ -28,20 +24,29 @@ router.post('/cursos', authMiddleware, professorOnly, async (req: AuthRequest, r
       return res.status(404).json({ erro: 'Professor não encontrado' });
     }
 
-    // Verificar se o curso de reforço existe
-    const cursoReforco = await Curso.findById(idCursoReforco);
-    if (!cursoReforco) {
-      return res.status(404).json({ erro: 'Curso de reforço não encontrado' });
-    }
-
     const novoCurso = new Curso({
       nome,
       descricao,
-      idCursoReforco,
+      idCursoReforco: null,
       idProfessor
     });
 
     await novoCurso.save();
+
+    // Se não foi fornecido idCursoReforco ou for string vazia, usar o próprio curso
+    if (!idCursoReforco || idCursoReforco === '') {
+      novoCurso.idCursoReforco = novoCurso._id;
+      await novoCurso.save();
+    } else {
+      // Verificar se o curso de reforço existe
+      const cursoReforco = await Curso.findById(idCursoReforco);
+      if (!cursoReforco) {
+        await Curso.deleteOne({ _id: novoCurso._id });
+        return res.status(404).json({ erro: 'Curso de reforço não encontrado' });
+      }
+      novoCurso.idCursoReforco = idCursoReforco;
+      await novoCurso.save();
+    }
     await novoCurso.populate([
       { path: 'idProfessor', select: '-senha' },
       { path: 'idCursoReforco' }
@@ -144,15 +149,17 @@ router.put('/cursos/:id', authMiddleware, professorOnly, async (req: AuthRequest
     }
 
     if (idCursoReforco !== undefined) {
-      if (!idCursoReforco) {
-        return res.status(400).json({ erro: 'Curso de reforço é obrigatório' });
+      if (idCursoReforco && idCursoReforco !== '') {
+        // Verificar se o curso de reforço existe
+        const cursoReforco = await Curso.findById(idCursoReforco);
+        if (!cursoReforco) {
+          return res.status(404).json({ erro: 'Curso de reforço não encontrado' });
+        }
+        curso.idCursoReforco = idCursoReforco;
+      } else {
+        // Se vazio ou não fornecido, usar o próprio curso
+        curso.idCursoReforco = curso._id;
       }
-      // Verificar se o curso de reforço existe
-      const cursoReforco = await Curso.findById(idCursoReforco);
-      if (!cursoReforco) {
-        return res.status(404).json({ erro: 'Curso de reforço não encontrado' });
-      }
-      curso.idCursoReforco = idCursoReforco;
     }
 
     await curso.save();
