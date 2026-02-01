@@ -59,8 +59,8 @@
               "script": {
                 "exec": [
                   "var jsonData = pm.response.json();",
-                  "pm.environment.set(\"PROFESSOR_TOKEN\", jsonData.token);",
-                  "pm.environment.set(\"PROFESSOR_ID\", jsonData.id);"
+                  "pm.collectionVariables.set(\"PROFESSOR_TOKEN\", jsonData.token);",
+                  "pm.collectionVariables.set(\"PROFESSOR_ID\", jsonData.id);"
                 ]
               }
             }
@@ -100,8 +100,8 @@
               "script": {
                 "exec": [
                   "var jsonData = pm.response.json();",
-                  "pm.environment.set(\"ALUNO_TOKEN\", jsonData.token);",
-                  "pm.environment.set(\"ALUNO_ID\", jsonData.id);"
+                  "pm.collectionVariables.set(\"ALUNO_TOKEN\", jsonData.token);",
+                  "pm.collectionVariables.set(\"ALUNO_ID\", jsonData.id);"
                 ]
               }
             }
@@ -1036,48 +1036,6 @@
           "response": []
         }
       ]
-    }
-  ],
-  "variable": [
-    {
-      "key": "BASE_URL",
-      "value": "http://localhost:3010",
-      "type": "string"
-    },
-    {
-      "key": "PROFESSOR_TOKEN",
-      "value": "",
-      "type": "string"
-    },
-    {
-      "key": "ALUNO_TOKEN",
-      "value": "",
-      "type": "string"
-    },
-    {
-      "key": "PROFESSOR_ID",
-      "value": "",
-      "type": "string"
-    },
-    {
-      "key": "ALUNO_ID",
-      "value": "",
-      "type": "string"
-    },
-    {
-      "key": "CURSO_ID",
-      "value": "",
-      "type": "string"
-    },
-    {
-      "key": "AVALIACAO_ID",
-      "value": "",
-      "type": "string"
-    },
-    {
-      "key": "AVALIACAO_ALUNO_ID",
-      "value": "",
-      "type": "string"
     }
   ]
 }

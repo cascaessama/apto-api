@@ -133,17 +133,21 @@ Response (200):
 ```
 apto-api/
 ├── src/
-│   ├── models/
-│   │   └── Professor.ts
-│   ├── routes/
-│   │   └── professores.ts
-│   └── index.ts
-├── dist/
-├── .env
+│   ├── middleware/          # autenticação e autorização
+│   ├── models/              # schemas e regras de negócio
+│   ├── routes/              # rotas da API
+│   └── index.ts             # bootstrap do servidor
+├── dist/                    # build TypeScript
+├── .env                     # variáveis de ambiente
 ├── package.json
 ├── tsconfig.json
-└── README.md
+├── README.md
+└── postman_collection.json  # coleção Postman
 ```
+
+## Coleção Postman
+
+As requisições estão disponíveis em [postman_collection.json](postman_collection.json).
 
 ## Segurança
 
