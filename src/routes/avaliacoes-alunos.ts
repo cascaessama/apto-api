@@ -362,4 +362,6 @@ router.get('/avaliacoes-alunos/aluno/:idAluno', authMiddleware, alunoOnly, async
   }
 });
 
+// Obter todos os alunos que precisam de reforço (notas < 7) - Apenas Professores
+
 export default router;

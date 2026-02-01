@@ -2,6 +2,7 @@ import { Router, Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
 import bcryptjs from 'bcryptjs';
 import { Professor } from '../models/Professor';
+import { AvaliacaoAluno } from '../models/AvaliacaoAluno';
 import { AuthRequest, authMiddleware, professorOnly } from '../middleware/auth';
 
 const router = Router();
@@ -83,6 +84,72 @@ router.get('/professores', authMiddleware, professorOnly, async (req: AuthReques
     res.json(professores);
   } catch (erro) {
     res.status(500).json({ erro: 'Erro ao buscar professores' });
+  }
+});
+
+// Buscar alunos com reforço
+router.get('/professores/alunos-reforco', authMiddleware, professorOnly, async (req: AuthRequest, res: Response) => {
+  try {
+    // Buscar todas as avaliações do aluno com nota < 7
+    const avaliacoesComReforco = await AvaliacaoAluno.find({
+      nota: { $lt: 7 }
+    })
+    .populate('idAluno', '-senha')
+    .populate({
+      path: 'idAvaliacao',
+      populate: {
+        path: 'idCurso',
+        select: 'nome idProfessor idCursoReforco'
+      }
+    });
+
+    if (avaliacoesComReforco.length === 0) {
+      return res.status(404).json({ erro: 'Nenhum aluno necessita de reforço' });
+    }
+
+    // Agrupar por aluno
+    const alunoMap = new Map<string, any>();
+
+    for (const avaliacao of avaliacoesComReforco) {
+      try {
+        const alunoId = (avaliacao.idAluno as any)?._id?.toString();
+        
+        if (!alunoId) {
+          continue;
+        }
+
+        if (!alunoMap.has(alunoId)) {
+          alunoMap.set(alunoId, {
+            idAluno: avaliacao.idAluno,
+            avaliacoes: []
+          });
+        }
+
+        const aluno = alunoMap.get(alunoId);
+        const avaliacaoPop = avaliacao.idAvaliacao as any;
+        const curso = avaliacaoPop?.idCurso as any;
+
+        aluno.avaliacoes.push({
+          idAvaliacao: avaliacao._id,
+          nomeAvaliacao: avaliacaoPop?.nome || 'Sem nome',
+          dataAvaliacao: avaliacaoPop?.dataAvaliacao,
+          nomeCurso: curso?.nome || 'Sem curso',
+          nota: avaliacao.nota,
+          observacoes: avaliacao.observacoes,
+          cursoReforco: null
+        });
+      } catch (itemError) {
+        // Continuar processando outros itens
+      }
+    }
+
+    const resultado = Array.from(alunoMap.values());
+    return res.json(resultado);
+  } catch (erro: any) {
+    return res.status(500).json({ 
+      erro: 'Erro ao buscar alunos com reforço',
+      detalhes: erro.message
+    });
   }
 });
 
