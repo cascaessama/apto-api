@@ -14,6 +14,10 @@ router.post('/cursos', authMiddleware, professorOnly, async (req: AuthRequest, r
       return res.status(400).json({ erro: 'Nome, descrição e ID do professor são obrigatórios' });
     }
 
+    if (!idCursoReforco) {
+      return res.status(400).json({ erro: 'Curso de reforço é obrigatório' });
+    }
+
     if (descricao.length > 500) {
       return res.status(400).json({ erro: 'Descrição não pode exceder 500 caracteres' });
     }
@@ -24,18 +28,16 @@ router.post('/cursos', authMiddleware, professorOnly, async (req: AuthRequest, r
       return res.status(404).json({ erro: 'Professor não encontrado' });
     }
 
-    // Verificar se o curso de reforço existe (se fornecido)
-    if (idCursoReforco) {
-      const cursoReforco = await Curso.findById(idCursoReforco);
-      if (!cursoReforco) {
-        return res.status(404).json({ erro: 'Curso de reforço não encontrado' });
-      }
+    // Verificar se o curso de reforço existe
+    const cursoReforco = await Curso.findById(idCursoReforco);
+    if (!cursoReforco) {
+      return res.status(404).json({ erro: 'Curso de reforço não encontrado' });
     }
 
     const novoCurso = new Curso({
       nome,
       descricao,
-      idCursoReforco: idCursoReforco || null,
+      idCursoReforco,
       idProfessor
     });
 
@@ -142,14 +144,15 @@ router.put('/cursos/:id', authMiddleware, professorOnly, async (req: AuthRequest
     }
 
     if (idCursoReforco !== undefined) {
-      if (idCursoReforco) {
-        // Verificar se o curso de reforço existe
-        const cursoReforco = await Curso.findById(idCursoReforco);
-        if (!cursoReforco) {
-          return res.status(404).json({ erro: 'Curso de reforço não encontrado' });
-        }
+      if (!idCursoReforco) {
+        return res.status(400).json({ erro: 'Curso de reforço é obrigatório' });
       }
-      curso.idCursoReforco = idCursoReforco || null;
+      // Verificar se o curso de reforço existe
+      const cursoReforco = await Curso.findById(idCursoReforco);
+      if (!cursoReforco) {
+        return res.status(404).json({ erro: 'Curso de reforço não encontrado' });
+      }
+      curso.idCursoReforco = idCursoReforco;
     }
 
     await curso.save();
