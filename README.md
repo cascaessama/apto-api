@@ -33,100 +33,33 @@ npm run build
 npm start
 ```
 
-## Endpoints - Professores
+## Docker
 
-### 1. Criar Professor
-**POST** `/api/professores`
+### Passo a passo para montar a imagem
 
-Request:
-```json
-{
-  "nome": "João Silva",
-  "senha": "123456"
-}
+1. Garanta que o arquivo `.env` esteja presente com as variáveis necessárias.
+2. Faça o build da imagem:
+
+```bash
+docker build -t apto-api:latest .
 ```
 
-Response (201):
-```json
-{
-  "id": "65a1b2c3d4e5f6g7h8i9j0k1",
-  "nome": "João Silva",
-  "mensagem": "Professor criado com sucesso"
-}
+3. Execute o container:
+
+```bash
+docker run --rm -p 3010:3010 --env-file .env apto-api:latest
 ```
 
-### 2. Listar Todos os Professores
-**GET** `/api/professores`
+## Endpoints
 
-Response (200):
-```json
-[
-  {
-    "_id": "65a1b2c3d4e5f6g7h8i9j0k1",
-    "nome": "João Silva",
-    "createdAt": "2026-01-18T10:30:00Z",
-    "updatedAt": "2026-01-18T10:30:00Z"
-  }
-]
-```
+Principais recursos da API:
 
-### 3. Obter Professor por ID
-**GET** `/api/professores/:id`
-
-Response (200):
-```json
-{
-  "_id": "65a1b2c3d4e5f6g7h8i9j0k1",
-  "nome": "João Silva",
-  "createdAt": "2026-01-18T10:30:00Z",
-  "updatedAt": "2026-01-18T10:30:00Z"
-}
-```
-
-### 4. Pesquisar Professor por Nome
-**GET** `/api/professores/nome/{nome}`
-
-Response (200):
-```json
-[
-  {
-    "_id": "65a1b2c3d4e5f6g7h8i9j0k1",
-    "nome": "João Silva",
-    "createdAt": "2026-01-18T10:30:00Z",
-    "updatedAt": "2026-01-18T10:30:00Z"
-  }
-]
-```
-
-### 5. Atualizar Professor
-**PUT** `/api/professores/:id`
-
-Request:
-```json
-{
-  "nome": "João Silva Atualizado",
-  "senha": "nova_senha"
-}
-```
-
-Response (200):
-```json
-{
-  "id": "65a1b2c3d4e5f6g7h8i9j0k1",
-  "nome": "João Silva Atualizado",
-  "mensagem": "Professor atualizado com sucesso"
-}
-```
-
-### 6. Deletar Professor
-**DELETE** `/api/professores/:id`
-
-Response (200):
-```json
-{
-  "mensagem": "Professor removido com sucesso"
-}
-```
+- Professores: CRUD e login
+- Alunos: CRUD e login
+- Cursos: CRUD
+- Avaliações: CRUD
+- Avaliações de Alunos: CRUD
+- Resumo de avaliações do aluno
 
 ## Estrutura do Projeto
 
